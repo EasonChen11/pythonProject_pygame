@@ -1,5 +1,7 @@
 # https://www.youtube.com/watch?v=61eX0bFAsYs&ab_channel=GrandmaCan-%E6%88%91%E9%98%BF%E5%AC%A4%E9%83%BD%E6%9C%83
 import pygame
+import random
+
 FPS = 60    # 60針
 WHITE = (255, 255, 255)
 WIDTH = 500
@@ -34,9 +36,32 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
+class Rock(pygame.sprite.Sprite):
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((30, 40))   # 創造平面
+        self.image.fill((0, 255, 0))    # 設定平面顏色
+        self.rect = self.image.get_rect()   # 把圖片加框線(可設定中心、上方...) (自己的邊界=圖片框線)(rect=rectangle矩形)
+        self.rect.x = random.randrange(0, WIDTH-self.rect.width)      # 設定座標位
+        self.rect.y = random.randrange(-100, -40)
+        self.speedx = random.randrange(-3, 3)
+        self.speedy = random.randrange(2, 10)
+    def reset(self):
+        self.rect.x = random.randrange(0, WIDTH - self.rect.width)
+        self.rect.y = random.randrange(-100, -40)
+        self.speedx = random.randrange(-3, 3)
+        self.speedy = random.randrange(2, 10)
+    def update(self):
+        self.rect.x += self.speedx
+        self.rect.y += self.speedy
+        if self.rect.top > HEIGHT or self.rect.left > WIDTH or self.rect.right < 0:
+            self.reset()
 all_sprites = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
+for i in range(8):
+    r = Rock()
+    all_sprites.add(r)
 
 # 取的時間物件
 clock = pygame.time.Clock()
