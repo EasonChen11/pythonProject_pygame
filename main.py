@@ -16,7 +16,13 @@ pygame.init()
 # 視窗大小
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("first game")    # 視窗標題
-#載入圖片 convert 轉成pygame 易讀檔案
+
+# 背景音樂
+pygame.mixer.init()
+pygame.mixer.music.load(f"./music/{random.randrange(0, 5)}.mp3")
+pygame.mixer.music.play()
+
+# 載入圖片 convert 轉成pygame 易讀檔案
 player_image = pygame.image.load("./img/player.png").convert()
 background = pygame.image.load("./img/background.png").convert()
 
@@ -51,8 +57,7 @@ class Rock(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         # self.image = pygame.Surface((30, 40))   # 創造平面
         # self.image.fill(RED)    # 設定平面顏色
-        random_rock = random.randrange(0, 6)
-        self.image = pygame.image.load(f"./img/rock{random_rock}.png")
+        self.image = pygame.image.load(f"./img/rock{random.randrange(0, 6)}.png")
         self.image.set_colorkey(WHITE)
         self.rect = self.image.get_rect()   # 把圖片加框線(可設定中心、上方...) (自己的邊界=圖片框線)(rect=rectangle矩形)
         self.rect.x = random.randrange(0, WIDTH-self.rect.width)      # 設定座標位
@@ -60,8 +65,7 @@ class Rock(pygame.sprite.Sprite):
         self.speedx = random.randrange(-3, 3)
         self.speedy = random.randrange(2, 10)
     def reset ( self ):
-        random_rock = random.randrange(0, 6)
-        self.image = pygame.image.load(f"./img/rock{random_rock}.png")
+        self.image = pygame.image.load(f"./img/rock{random.randrange(0, 6)}.png")
         self.image.set_colorkey(WHITE)
         self.rect = self.image.get_rect()   # 把圖片加框線(可設定中心、上方...) (自己的邊界=圖片框線)(rect=rectangle矩形)
         self.rect.x = random.randrange(0, WIDTH - self.rect.width)
@@ -98,4 +102,5 @@ while running:
     screen.blit(background, (0, 0))     # blit(畫) 第一個是圖片，第二個是位置
     all_sprites.draw(screen)            # 把all_sprites群組內的東西印在畫面
     pygame.display.update()                      # 更新畫面=pygame.display.flip()更新全部，update可以有參數
+pygame.mixer.music.stop()
 pygame.quit()
