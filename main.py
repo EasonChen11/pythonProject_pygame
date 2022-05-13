@@ -19,12 +19,13 @@ pygame.display.set_caption("first game")    # 視窗標題
 
 # 背景音樂
 pygame.mixer.init()
-pygame.mixer.music.load(f"./music/{random.randrange(0, 5)}.mp3")
+pygame.mixer.music.load(f"./music/{random.randrange(0, 6)}.mp3")
 pygame.mixer.music.play()
 
 # 載入圖片 convert 轉成pygame 易讀檔案
 player_image = pygame.image.load("./img/player.png").convert()
 background = pygame.image.load("./img/background.png").convert()
+bullet_image = pygame.image.load("./img/bullet.png").convert()
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -52,6 +53,11 @@ class Player(pygame.sprite.Sprite):
         if self.rect.left < 0:
             self.rect.left = 0
 
+    def shoot(self):
+        bullet = Bullet(self.rect.centerx, self.rect.top)
+        all_sprites.add(bullet)
+
+
 class Rock(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -78,6 +84,20 @@ class Rock(pygame.sprite.Sprite):
         if self.rect.top > HEIGHT or self.rect.left > WIDTH or self.rect.right < 0:
             self.reset()
 
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = bullet_image
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect()   # 把圖片加框線(可設定中心、上方...) (自己的邊界=圖片框線)(rect=rectangle矩形)
+        self.rect.centerx = x      # 設定座標位
+        self.rect.bottom = y
+        self.speedy = -10
+    def update (self):
+        self.rect.y += self.speedy
+        if self.rect.bottom < 0:
+            self.kill()     # 把所有包含此sprite 的Group 刪除此元素
+
 all_sprites = pygame.sprite.Group()
 player = Player()
 all_sprites.add(player)
@@ -92,9 +112,12 @@ running = True
 while running:
     clock.tick(FPS)                     # 一秒最多刷新FPS次(1秒跑最多幾次while)
     # 取得輸入
-    for even in pygame.event.get():     # 回傳所有動作
-        if even.type == pygame.QUIT:    # 如果按下X ,pygame.QUIT 是按下X後的型態
+    for event in pygame.event.get():     # 回傳所有動作
+        if event.type == pygame.QUIT:    # 如果按下X ,pygame.QUIT 是按下X後的型態
             running = False             # 跳出迴圈
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                player.shoot()
     # 更新遊戲
     all_sprites.update()                # 執行all_sprites群組內所有成員的update函式
     # 畫面顯示
