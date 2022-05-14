@@ -32,12 +32,14 @@ rocks_image = []
 for i in range(0, 7):
     rocks_image.append(pygame.image.load(f"./img/rock{i}.png").convert())
 rock_score = {}
+damage = {}
 for i in range(0, 7):
     rock_score[rocks_image[i]] = rocks_image[6-i].get_rect().width / 2
+    damage[rocks_image[i]] = i+1
 
-font_name = pygame.font.match_font('arial')  # 取的自型
+font_name = pygame.font.match_font('arial')  # 取的字型
 def draw_text(surface, text, size, x, y):
-    font = pygame.font.Font(font_name, size)    # 給定自型和大小
+    font = pygame.font.Font(font_name, size)    # 給定字型和大小# font:字型 render:使成為
     text_surface = font.render(text, True, WHITE)   # 製造文字平面(文字,Anti-aliasing{抗鋸齒文字},字體顏色)
     text_rect = text_surface.get_rect()
     text_rect.centerx = x
@@ -58,7 +60,7 @@ class Player(pygame.sprite.Sprite):
         self.rect.centerx  = WIDTH/2
         self.rect.bottom = HEIGHT - 10
         self.speedx = 8
-        self.HP = 5
+        self.HP = 500
 
     def update(self):
         key_pressed = pygame.key.get_pressed()  # 取得鍵盤哪個鍵被按下的bool，函式會傳回list包含每個按鍵的bool(有按=True,else=False)
@@ -78,8 +80,8 @@ class Player(pygame.sprite.Sprite):
         all_sprites.add(bullet)
         bullets.add(bullet)
 
-    def hit(self):
-        self.HP -= 1
+    def hit(self, which_rock):
+        self.HP -= damage[which_rock]
 
 class Rock(pygame.sprite.Sprite):
     def __init__(self):
@@ -158,6 +160,7 @@ while running:
                 player.shoot()
     # 更新遊戲
     all_sprites.update()                # 執行all_sprites群組內所有成員的update函式
+
     hits = pygame.sprite.groupcollide(rocks, bullets, True, True, pygame.sprite.collide_circle)   # 檢查Group之間是否有碰撞(倒數兩個決定是否kill sprite)(最後一個給判斷邊界，預設矩形)
                                                                 # 上面回傳 dictionary {key:rock,value:bullet}
     for rock, bullet in hits.items():
@@ -165,14 +168,17 @@ while running:
         r = Rock()
         rocks.add(r)
         all_sprites.add(r)
-    hits = pygame.sprite.spritecollide(player, rocks, True, pygame.sprite.collide_circle)
+
+    hits = pygame.sprite.spritecollide(player, rocks, False, pygame.sprite.collide_circle)
     if hits:
+        player.hit(hits[0].image_origin)
+        hits[0].kill()
         r = Rock()
         rocks.add(r)
         all_sprites.add(r)
-        player.hit()
-    if not player.HP:
+    if player.HP <= 0:
         running = False
+
     # 畫面顯示
     # screen.fill(WHITE) # screen 為上面宣告的display ,fill 傳入三個(R,G,B) ,每個0-255 ,代表濃度
     screen.blit(background, (0, 0))     # blit(畫) 第一個是圖片，第二個是位置
@@ -181,6 +187,7 @@ while running:
     draw_text(screen, f"HP:{int(player.HP)}", 18, WIDTH / 4, 10)
     pygame.display.update()                      # 更新畫面=pygame.display.flip()更新全部，update可以有參數
 pygame.mixer.music.stop()
+
 quit_game = True
 pygame.mixer.music.load("./music/fail.mp3")
 pygame.mixer.music.play()
@@ -194,4 +201,5 @@ while quit_game:
     screen.blit(fail, (0, 0))
     pygame.display.update()
 pygame.mixer.music.stop()
+
 pygame.quit()
